@@ -15,6 +15,13 @@
       "first_stage": 3,
       "num_initial": 7,
       "num_subsequent": 4
-  }
-]
+    }
+  ],
+  "wall_spawn_rules": [
+    {
+      "first_stage": 1,
+      "num_initial": 1,
+      "num_subsequent": 1
+    }
+  ]
 }

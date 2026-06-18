@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { GameState, Player, Collectible, GridCell, PlayerColor, CollectibleType, CollectibleColor, CollectibleOrientation, Enemy, EnemyPersonality } from "../schema/GameState";
+import { GameState, Player, Collectible, GridCell, PlayerColor, CollectibleType, CollectibleColor, CollectibleOrientation, Wall, Enemy, EnemyPersonality } from "../schema/GameState";
 import { CollectibleFactory } from "../collectibles";
 import { CollectibleSpawnConfig, COLLECTIBLE_PROPERTIES } from "../config/CollectibleSpawnConfig";
 import { LevelSpec, parseUnrealExport } from "../config/LevelSpec";
@@ -279,6 +279,32 @@ export class GameRoom extends Room<GameState> {
             otherPlayer.y === newY) {
           isBlocked = true;
         }
+      });
+
+      // Check for collision with walls
+      this.state.walls.forEach((wall) => {
+          switch (direction) {
+            case "up":
+              if (newX == wall.x && newY == (wall.y - 0.5)) {
+                  isBlocked = true;
+              }
+              break;
+            case "down":
+              if (newX == wall.x && newY == (wall.y + 0.5)) {
+                  isBlocked = true;
+              }
+              break;
+            case "left":
+              if (newY == wall.y && newX == (wall.x - 0.5)) {
+                  isBlocked = true;
+              }
+              break;
+            case "right":
+              if (newY == wall.y && newX == (wall.x + 0.5)) {
+                  isBlocked = true;
+              }
+              break;
+          }
       });
 
       // Only move and paint if not blocked
@@ -863,6 +889,11 @@ export class GameRoom extends Room<GameState> {
     this.generateInitialCollectibles();
     this.calculateScores();
 
+    // Generate initial walls from config (if any wall rules exist)
+    if (this.collectibleSpawnConfig.wall_spawn_rules?.length) {
+        this.generateInitialWalls();
+    }
+
     // Spawn initial enemies from config (if any enemy rules exist)
     // Skip enemy spawn rules when a level spec is loaded (enemies come from the level spec instead)
     if (!this.levelSpec) {
@@ -1172,6 +1203,50 @@ export class GameRoom extends Room<GameState> {
     }
 
     console.log(`Generated ${this.state.collectibles.length} initial collectibles`);
+  }
+
+  private generateInitialWalls() {
+
+    // Skipping level spec for now cause no clue how to do that
+    let wallCounter: number = 0;
+
+    // Calculate center offset for the 26x26 grid
+    const center = Math.floor(this.MAX_GRID_SIZE / 2);
+    const halfWidth = Math.floor(this.INITIAL_VISIBLE_WIDTH / 2);
+    const halfHeight = Math.floor(this.INITIAL_VISIBLE_HEIGHT / 2);
+    const minX = center - halfWidth;
+    const maxX = center + halfWidth - 1;
+    const minY = center - halfHeight;
+    const maxY = center + halfHeight - 1;
+
+    // Spawn walls based on config for stage 1
+    for (const rule of this.collectibleSpawnConfig.wall_spawn_rules) {
+        if (rule.first_stage !== 1) continue;
+
+        const counter = wallCounter || 0;
+        wallCounter = counter;
+
+        for (let i = 0; i < rule.num_initial; i++) {
+            const wall = new Wall();
+            const currentCount = wallCounter!;
+            wall.id = `WALL-${currentCount}`;
+            wallCounter = currentCount + 1;
+
+            let x: number, y: number;
+            do {
+                // Spawn at half-integer positions (between nodes) on x axis, but interger positions on y axis
+                x = minX + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH - 1)) + 0.5;
+                y = minY + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT));
+            } while (this.isPositionOccupied(x, y));
+
+            wall.x = x;
+            wall.y = y;
+
+            this.state.walls.push(wall);
+        }
+    }
+
+    console.log(`Generated ${this.state.walls.length} initial walls`);
   }
 
   private spawnCluesFromLevelSpec(stage: number) {

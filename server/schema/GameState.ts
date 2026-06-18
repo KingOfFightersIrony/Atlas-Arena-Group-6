@@ -32,6 +32,12 @@ export class Collectible extends Schema {
   @type("number") score: number = 0;
 }
 
+export class Wall extends Schema {
+	@type("number") x: number = 0;
+	@type("number") y: number = 0;
+	@type("string") id: string = "";
+}
+
 export type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding" | "prismatic";
 
 export class Enemy extends Schema {
@@ -54,6 +60,8 @@ export class GameState extends Schema {
   @type({ map: GridCell }) gridColors = new MapSchema<GridCell>();
 
   @type([Collectible]) collectibles = new ArraySchema<Collectible>();
+
+  @type([Wall]) walls = new ArraySchema<Wall>();
 
   @type([Enemy]) enemies = new ArraySchema<Enemy>();
 

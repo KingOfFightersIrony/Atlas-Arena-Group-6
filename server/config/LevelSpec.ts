@@ -25,6 +25,12 @@ export interface LevelClue {
   shape?: PolyominoShape[]; // For polyomino clues
 }
 
+// Wall definition
+export interface LevelWall {
+  x: number;
+  y: number;
+}
+
 // Enemy definition
 export interface LevelEnemy {
   x: number;
@@ -35,6 +41,7 @@ export interface LevelEnemy {
 // Stage definition
 export interface LevelStage {
   clues: LevelClue[];
+  walls?: LevelWall[];
   enemies?: LevelEnemy[];
 }
 

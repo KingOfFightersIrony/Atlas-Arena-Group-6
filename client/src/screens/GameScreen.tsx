@@ -20,6 +20,7 @@ import { PulseRipple } from "@/components/game/PulseRipple";
 import { FloatingScore } from "@/components/FloatingScore";
 import { ClickHandler } from "@/components/ClickHandler";
 import { LambdaSymbol } from "@/components/LambdaSymbol";
+import { WallEntity } from "@/components/WallEntity";
 import { EnemyEntity } from "@/components/EnemyEntity";
 import { Info, Scale, Settings, Volume2, VolumeX, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,12 @@ interface Collectible {
   orientation: CollectibleOrientation;
   isFlipped: boolean;
   score: number;
+}
+
+interface Wall {
+  x: number;
+  y: number;
+  id: string;
 }
 
 interface EnemyState {
@@ -267,7 +274,59 @@ const lineFragmentShader = `
   }
 `;
 
-const ConnectionLines = ({ nodeStates, gridWidth, gridHeight }: { nodeStates: (string | null)[][], gridWidth: number, gridHeight: number }) => {
+const getWallLocalPosition = (
+  wall: Wall,
+  gridWidth: number,
+  gridHeight: number
+) => {
+  const MAX_GRID = 26;
+  const center = Math.floor(MAX_GRID / 2);
+  const halfWidth = Math.floor(gridWidth / 2);
+  const halfHeight = Math.floor(gridHeight / 2);
+  const minX = center - halfWidth;
+  const minY = center - halfHeight;
+
+  return {
+    x: wall.x - minX,
+    y: wall.y - minY,
+  };
+};
+
+const isWallBetweenHorizontal = (
+  posX: number,
+  posZ: number,
+  walls: Wall[],
+  gridWidth: number,
+  gridHeight: number
+): boolean => {
+  return walls.some((wall) => {
+    const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
+
+    return (
+      localWall.x === posX + 0.5 &&
+      localWall.y === posZ
+    );
+  });
+};
+
+const isWallBetweenVertical = (
+  posX: number,
+  posZ: number,
+  walls: Wall[],
+  gridWidth: number,
+  gridHeight: number
+): boolean => {
+  return walls.some((wall) => {
+    const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
+
+    return (
+      localWall.x === posX &&
+      localWall.y === posZ + 0.5
+    );
+  });
+};
+
+const ConnectionLines = ({ nodeStates, gridWidth, gridHeight, walls = [] }: { nodeStates: (string | null)[][], gridWidth: number, gridHeight: number, walls: Wall[] }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
 
   const lines = useMemo(() => {
@@ -280,7 +339,7 @@ const ConnectionLines = ({ nodeStates, gridWidth, gridHeight }: { nodeStates: (s
         const color = nodeStates[x][z];
         if (!color || color === "gray") continue;
 
-        if (x < gridWidth - 1 && nodeStates[x + 1][z] === color) {
+        if (x < gridWidth - 1 && nodeStates[x + 1][z] === color && !isWallBetweenHorizontal(x, z, walls, gridWidth, gridHeight)) {
           items.push({
             px: (x + 0.5 - offsetX) * SPACING,
             pz: (z - offsetZ) * SPACING,
@@ -288,7 +347,7 @@ const ConnectionLines = ({ nodeStates, gridWidth, gridHeight }: { nodeStates: (s
             color,
           });
         }
-        if (z < gridHeight - 1 && nodeStates[x][z + 1] === color) {
+        if (z < gridHeight - 1 && nodeStates[x][z + 1] === color && !isWallBetweenVertical(x, z, walls, gridWidth, gridHeight)) {
           items.push({
             px: (x - offsetX) * SPACING,
             pz: (z + 0.5 - offsetZ) * SPACING,
@@ -299,7 +358,7 @@ const ConnectionLines = ({ nodeStates, gridWidth, gridHeight }: { nodeStates: (s
       }
     }
     return items;
-  }, [nodeStates, gridWidth, gridHeight]);
+  }, [nodeStates, gridWidth, gridHeight, walls]);
 
   const maxCount = gridWidth * gridHeight * 2;
 
@@ -373,6 +432,7 @@ interface GameScreenProps {
   players: Map<string, PlayerState>;
   gridColors: Map<string, PlayerColor>;
   collectibles: Collectible[];
+  walls: Wall[];
   enemies: EnemyState[];
   gridWidth: number;
   gridHeight: number;
@@ -476,6 +536,7 @@ export const GameScreen = ({
   players,
   gridColors,
   collectibles,
+  walls,
   enemies,
   gridWidth,
   gridHeight,
@@ -1026,9 +1087,36 @@ export const GameScreen = ({
           }
 
           // Check for collision with other players
-          const isBlocked = playerArray.some(
+          let isBlocked = playerArray.some(
             p => p !== currentPlayer && p.x === newX && p.y === newY
           );
+          
+          // Check for collision with walls
+          const wallArray = Array.from(walls.values())
+          wallArray.forEach((wall) => {
+              switch (direction) {
+                case "up":
+                  if (newX == wall.x && newY == (wall.y - 0.5)) {
+                      isBlocked = true;
+                  }
+                  break;
+                case "down":
+                  if (newX == wall.x && newY == (wall.y + 0.5)) {
+                      isBlocked = true;
+                  }
+                  break;
+                case "left":
+                  if (newY == wall.y && newX == (wall.x - 0.5)) {
+                      isBlocked = true;
+                  }
+                  break;
+                case "right":
+                  if (newY == wall.y && newX == (wall.x + 0.5)) {
+                      isBlocked = true;
+                  }
+                  break;
+              }
+          });
 
           if (!isBlocked) {
             playSound("move");
@@ -2152,7 +2240,7 @@ export const GameScreen = ({
         <pointLight position={[-10, -10, -10]} intensity={0.5} color={getFloorTint("GREEN")} />
 
         <ParticleFloor key={`floor-${gridWidth}-${gridHeight}`} gridWidth={gridWidth} gridHeight={gridHeight} spacing={SPACING} nodeStates={nodeStates} rippleTrigger={rippleTrigger} />
-            <ConnectionLines key={`lines-${gridWidth}-${gridHeight}`} nodeStates={nodeStates} gridWidth={gridWidth} gridHeight={gridHeight} />
+            <ConnectionLines key={`lines-${gridWidth}-${gridHeight}`} nodeStates={nodeStates} gridWidth={gridWidth} gridHeight={gridHeight} walls={walls} />
 
             {/* Collectibles */}
             {collectibles.map((collectible) => {
@@ -2262,6 +2350,14 @@ export const GameScreen = ({
                   rotation={0}
                   isMe={isMe}
                 />
+              );
+            })}
+
+            {/* Walls */}
+            {walls.map((wall) => {
+              const pos = getVisualPos(wall.x, wall.y, -2.0);
+              return (
+                <WallEntity key={wall.id} position={pos} />
               );
             })}
 

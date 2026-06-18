@@ -56,6 +56,12 @@ interface Collectible {
   score: number;
 }
 
+interface Wall {
+    x: number;
+    y: number;
+    id: string;
+}
+
 type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding";
 
 interface EnemyState {
@@ -78,6 +84,7 @@ interface ServerGameState {
   isGameOver: boolean;
   timeRemaining: number;
   collectibles: Map<string, Collectible>;
+  walls: Map<string, Wall>;
   enemies: Map<string, EnemyState>;
   stage: number;
   stageThresholds: number[];
@@ -91,6 +98,7 @@ interface GameStateLocal {
   players: Map<string, PlayerState>;
   gridColors: Map<string, PlayerColor>;
   collectibles: Collectible[];
+  walls: Wall[];
   enemies: EnemyState[];
   scores: Record<PlayerColor, number>;
   totalScore: number;
@@ -112,6 +120,7 @@ const initialGameState: GameStateLocal = {
   players: new Map(),
   gridColors: new Map(),
   collectibles: [],
+  walls: [],
   enemies: [],
   scores: { RED: 0, GREEN: 0, BLUE: 0 },
   totalScore: 0,
@@ -266,6 +275,15 @@ const Index = () => {
       });
     });
 
+    const newWalls: Wall[] = [];
+    gameRoom.state.walls?.forEach((wall) => {
+        newWalls.push({
+            x: wall.x,
+            y: wall.y,
+            id: wall.id
+        });
+    });
+
     const newEnemies: EnemyState[] = [];
     gameRoom.state.enemies?.forEach((enemy) => {
       newEnemies.push({
@@ -289,6 +307,7 @@ const Index = () => {
         players: newPlayers,
         gridColors: newGridColors,
         collectibles: newCollectibles,
+        walls: newWalls,
         enemies: newEnemies,
         scores: {
           RED: gameRoom.state.scores?.get("RED") || 0,
@@ -592,6 +611,7 @@ const Index = () => {
         players={gameState.players}
         gridColors={gameState.gridColors}
         collectibles={gameState.collectibles}
+        walls={gameState.walls}
         enemies={gameState.enemies}
         gridWidth={gameState.gridWidth}
         gridHeight={gameState.gridHeight}
