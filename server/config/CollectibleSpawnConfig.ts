@@ -28,6 +28,12 @@ export interface WallSpawnRule {
   num_subsequent: number;
 }
 
+export interface WallAnchorSpawnRule {
+	first_stage: number;
+	num_initial: number;
+	num_subsequent: number;
+}
+
 export interface EnemySpawnRule {
   first_stage: number;
   num_initial: number;
@@ -40,5 +46,6 @@ export interface CollectibleSpawnConfig {
   custom_target_scores: number[];
   collectible_spawn_rules: CollectibleSpawnRule[];
   wall_spawn_rules: WallSpawnRule[];
+  wall_anchor_spawn_rules: WallAnchorSpawnRule[];
   enemy_spawn_rules?: EnemySpawnRule[];
 }

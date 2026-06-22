@@ -62,6 +62,12 @@ interface Wall {
     id: string;
 }
 
+interface WallAnchor {
+    x: number;
+    y: number;
+    id: string;
+}
+
 type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding";
 
 interface EnemyState {
@@ -85,6 +91,7 @@ interface ServerGameState {
   timeRemaining: number;
   collectibles: Map<string, Collectible>;
   walls: Map<string, Wall>;
+  wallAnchors: Map<string, WallAnchor>;
   enemies: Map<string, EnemyState>;
   stage: number;
   stageThresholds: number[];
@@ -121,6 +128,7 @@ const initialGameState: GameStateLocal = {
   gridColors: new Map(),
   collectibles: [],
   walls: [],
+  wallAnchors: [],
   enemies: [],
   scores: { RED: 0, GREEN: 0, BLUE: 0 },
   totalScore: 0,
@@ -284,6 +292,15 @@ const Index = () => {
         });
     });
 
+    const newWallAnchors: WallAnchor[] = [];
+    gameRoom.state.wallAnchors?.forEach((wallAnchor) => {
+        newWallAnchors.push({
+            x: wallAnchor.x,
+            y: wallAnchor.y,
+            id: wallAnchor.id
+        });
+    });
+
     const newEnemies: EnemyState[] = [];
     gameRoom.state.enemies?.forEach((enemy) => {
       newEnemies.push({
@@ -308,6 +325,7 @@ const Index = () => {
         gridColors: newGridColors,
         collectibles: newCollectibles,
         walls: newWalls,
+        wallAnchors: newWallAnchors,
         enemies: newEnemies,
         scores: {
           RED: gameRoom.state.scores?.get("RED") || 0,
@@ -612,6 +630,7 @@ const Index = () => {
         gridColors={gameState.gridColors}
         collectibles={gameState.collectibles}
         walls={gameState.walls}
+        wallAnchors={gameState.wallAnchors}
         enemies={gameState.enemies}
         gridWidth={gameState.gridWidth}
         gridHeight={gameState.gridHeight}

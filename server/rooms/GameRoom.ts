@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { GameState, Player, Collectible, GridCell, PlayerColor, CollectibleType, CollectibleColor, CollectibleOrientation, Wall, Enemy, EnemyPersonality } from "../schema/GameState";
+import { GameState, Player, Collectible, GridCell, PlayerColor, CollectibleType, CollectibleColor, CollectibleOrientation, Wall, WallAnchor, Enemy, EnemyPersonality } from "../schema/GameState";
 import { CollectibleFactory } from "../collectibles";
 import { CollectibleSpawnConfig, COLLECTIBLE_PROPERTIES } from "../config/CollectibleSpawnConfig";
 import { LevelSpec, parseUnrealExport } from "../config/LevelSpec";
@@ -894,6 +894,11 @@ export class GameRoom extends Room<GameState> {
         this.generateInitialWalls();
     }
 
+    // Generate initial wall anchors from config (if any wall anchor rules exist)
+    if (this.collectibleSpawnConfig.wall_anchor_spawn_rules?.length) {
+        this.generateInitialWallAnchors();
+    }
+
     // Spawn initial enemies from config (if any enemy rules exist)
     // Skip enemy spawn rules when a level spec is loaded (enemies come from the level spec instead)
     if (!this.levelSpec) {
@@ -1247,6 +1252,50 @@ export class GameRoom extends Room<GameState> {
     }
 
     console.log(`Generated ${this.state.walls.length} initial walls`);
+  }
+
+  private generateInitialWallAnchors() {
+
+    // Skipping level spec for now cause no clue how to do that
+    let wallAnchorCounter: number = 0;
+
+    // Calculate center offset for the 26x26 grid
+    const center = Math.floor(this.MAX_GRID_SIZE / 2);
+    const halfWidth = Math.floor(this.INITIAL_VISIBLE_WIDTH / 2);
+    const halfHeight = Math.floor(this.INITIAL_VISIBLE_HEIGHT / 2);
+    const minX = center - halfWidth;
+    const maxX = center + halfWidth - 1;
+    const minY = center - halfHeight;
+    const maxY = center + halfHeight - 1;
+
+    // Spawn wall anchors based on config for stage 1
+    for (const rule of this.collectibleSpawnConfig.wall_anchor_spawn_rules) {
+        if (rule.first_stage !== 1) continue;
+
+        const counter = wallAnchorCounter || 0;
+        wallAnchorCounter = counter;
+
+        for (let i = 0; i < rule.num_initial; i++) {
+            const wallAnchor = new WallAnchor();
+            const currentCount = wallAnchorCounter!;
+            wallAnchor.id = `WALLANCHOR-${currentCount}`;
+            wallAnchorCounter = currentCount + 1;
+
+            let x: number, y: number;
+            do {
+                // Spawn at integer positions (on nodes)
+                x = minX + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH));
+                y = minY + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT));
+            } while (this.isPositionOccupied(x, y));
+
+            wallAnchor.x = x;
+            wallAnchor.y = y;
+
+            this.state.wallAnchors.push(wallAnchor);
+        }
+    }
+
+    console.log(`Generated ${this.state.wallAnchors.length} initial wall anchors`);
   }
 
   private spawnCluesFromLevelSpec(stage: number) {

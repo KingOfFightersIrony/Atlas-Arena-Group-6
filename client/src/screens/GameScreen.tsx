@@ -21,6 +21,7 @@ import { FloatingScore } from "@/components/FloatingScore";
 import { ClickHandler } from "@/components/ClickHandler";
 import { LambdaSymbol } from "@/components/LambdaSymbol";
 import { WallEntity } from "@/components/WallEntity";
+import { WallAnchorEntity } from "@/components/WallAnchorEntity";
 import { EnemyEntity } from "@/components/EnemyEntity";
 import { Info, Scale, Settings, Volume2, VolumeX, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -71,6 +72,12 @@ interface Collectible {
 }
 
 interface Wall {
+  x: number;
+  y: number;
+  id: string;
+}
+
+interface WallAnchor {
   x: number;
   y: number;
   id: string;
@@ -433,6 +440,7 @@ interface GameScreenProps {
   gridColors: Map<string, PlayerColor>;
   collectibles: Collectible[];
   walls: Wall[];
+  wallAnchors: WallAnchor[];
   enemies: EnemyState[];
   gridWidth: number;
   gridHeight: number;
@@ -537,6 +545,7 @@ export const GameScreen = ({
   gridColors,
   collectibles,
   walls,
+  wallAnchors,
   enemies,
   gridWidth,
   gridHeight,
@@ -2358,6 +2367,14 @@ export const GameScreen = ({
               const pos = getVisualPos(wall.x, wall.y, -2.0);
               return (
                 <WallEntity key={wall.id} position={pos} />
+              );
+            })}
+
+            {/* WallAnchors */}
+            {wallAnchors.map((wallAnchor) => {
+              const pos = getVisualPos(wallAnchor.x, wallAnchor.y, -2.0);
+              return (
+                <WallAnchorEntity key={wallAnchor.id} position={pos} />
               );
             })}
 
