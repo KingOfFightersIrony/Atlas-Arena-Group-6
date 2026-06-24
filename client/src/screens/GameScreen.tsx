@@ -282,55 +282,55 @@ const lineFragmentShader = `
 `;
 
 const getWallLocalPosition = (
-  wall: Wall,
-  gridWidth: number,
-  gridHeight: number
+    wall: Wall,
+    gridWidth: number,
+    gridHeight: number
 ) => {
-  const MAX_GRID = 26;
-  const center = Math.floor(MAX_GRID / 2);
-  const halfWidth = Math.floor(gridWidth / 2);
-  const halfHeight = Math.floor(gridHeight / 2);
-  const minX = center - halfWidth;
-  const minY = center - halfHeight;
+    const MAX_GRID = 26;
+    const center = Math.floor(MAX_GRID / 2);
+    const halfWidth = Math.floor(gridWidth / 2);
+    const halfHeight = Math.floor(gridHeight / 2);
+    const minX = center - halfWidth;
+    const minY = center - halfHeight;
 
-  return {
-    x: wall.x - minX,
-    y: wall.y - minY,
-  };
+    return {
+        x: wall.x - minX,
+        y: wall.y - minY,
+    };
 };
 
 const isWallBetweenHorizontal = (
-  posX: number,
-  posZ: number,
-  walls: Wall[],
-  gridWidth: number,
-  gridHeight: number
+    posX: number,
+    posZ: number,
+    walls: Wall[],
+    gridWidth: number,
+    gridHeight: number
 ): boolean => {
-  return walls.some((wall) => {
-    const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
+    return walls.some((wall) => {
+        const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
 
-    return (
-      localWall.x === posX + 0.5 &&
-      localWall.y === posZ
-    );
-  });
+        return (
+            localWall.x === posX + 0.5 &&
+            localWall.y === posZ
+        );
+    });
 };
 
 const isWallBetweenVertical = (
-  posX: number,
-  posZ: number,
-  walls: Wall[],
-  gridWidth: number,
-  gridHeight: number
+    posX: number,
+    posZ: number,
+    walls: Wall[],
+    gridWidth: number,
+    gridHeight: number
 ): boolean => {
-  return walls.some((wall) => {
-    const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
+    return walls.some((wall) => {
+        const localWall = getWallLocalPosition(wall, gridWidth, gridHeight);
 
-    return (
-      localWall.x === posX &&
-      localWall.y === posZ + 0.5
-    );
-  });
+        return (
+            localWall.x === posX &&
+            localWall.y === posZ + 0.5
+        );
+    });
 };
 
 const ConnectionLines = ({ nodeStates, gridWidth, gridHeight, walls = [] }: { nodeStates: (string | null)[][], gridWidth: number, gridHeight: number, walls: Wall[] }) => {
