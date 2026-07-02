@@ -2366,7 +2366,7 @@ export const GameScreen = ({
             {walls.map((wall) => {
               const pos = getVisualPos(wall.x, wall.y, -2.0);
               return (
-                <WallEntity key={wall.id} position={pos} />
+                <WallEntity key={wall.id} position={pos} gridx={wall.x} />
               );
             })}
 
