@@ -91,6 +91,18 @@ export class GameRoom extends Room<GameState> {
   private milestoneReportedTypes = new Set<string>();
   private pendingMilestoneRequests: Promise<void>[] = [];
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
+  private wallLayouts: [number, number][][] = [
+      [[-1, -1.5], [-0.5, 0], [0.5, 0], [0, 0.5], [-0.5, 1], [1.5, 1], [1, 1.5]],
+      [[-0.5, -1], [-1, -0.5], [1.5, 0], [-1, 0.5], [0, 0.5], [-1.5, 1], [0.5, 1]],
+      [[0, -1.5], [1.5, -1], [1, -0.5], [-1.5, 0], [-1, 0.5], [0, 0.5], [-1.5, 1]],
+      [[-1.5, -1], [0.5, -1], [-1, -0.5], [1, -0.5], [1.5, 0], [-1, 0.5], [0, 0.5]],
+      [[-1, -1.5], [0, -0.5], [1, -0.5], [0.5, 0], [-1, 0.5], [1, 0.5], [-0.5, 1]],
+      [[0, -1.5], [1, -1.5], [-1.5, -1], [0.5, -1], [-1, 0.5], [-0.5, 1], [0, 1.5]],
+      [[-0.5, -1], [1, -0.5], [-0.5, 0], [1.5, 0], [-1, 0.5], [-0.5, 1], [0.5, 1]],
+      [[0.5, -1], [-1, -0.5], [1, -0.5], [-1, 0.5], [0, 0.5], [0.5, 1], [1, 1.5]],
+      [[1, -1.5], [-0.5, -1], [-1, -0.5], [0.5, 0], [-1, 0.5], [0, 0.5], [-1.5, 1]],
+      [[0, -1.5], [-0.5, -1], [-1.5, 0], [0.5, 0], [-1, 0.5], [0, 0.5], [1, 1.5]]
+  ]; // wall layouts are arrays of tuples that contain the location (with respect to the anchor) of each wall segment in the layout, this is an array of these layouts
 
   onCreate(options: any) {
     console.log("GameRoom created with options:", options, "| Room ID:", this.roomId);
@@ -228,7 +240,7 @@ export class GameRoom extends Room<GameState> {
       let player: Player | undefined;
       let playerKey: string | undefined;
 
-      if (this.isSoloMode && this.isPlatformManaged && message.targetColor) {
+      if (this.isSoloMode && message.targetColor) {
         // Find the player with the requested color
         this.state.players.forEach((p, key) => {
           if (p.color === message.targetColor) {
@@ -885,19 +897,15 @@ export class GameRoom extends Room<GameState> {
 
     console.log(`Game mode: ${this.isSoloMode ? 'SOLO' : 'MULTIPLAYER'}`);
 
-    // Generate initial collectibles
-    this.generateInitialCollectibles();
-    this.calculateScores();
-
-    // Generate initial walls from config (if any wall rules exist)
-    if (this.collectibleSpawnConfig.wall_spawn_rules?.length) {
-        this.generateInitialWalls();
-    }
-
     // Generate initial wall anchors from config (if any wall anchor rules exist)
+    // This will also generate wall layouts around any generated anchors
     if (this.collectibleSpawnConfig.wall_anchor_spawn_rules?.length) {
         this.generateInitialWallAnchors();
     }
+
+    // Generate initial collectibles
+    this.generateInitialCollectibles();
+    this.calculateScores();
 
     // Spawn initial enemies from config (if any enemy rules exist)
     // Skip enemy spawn rules when a level spec is loaded (enemies come from the level spec instead)
@@ -1210,50 +1218,6 @@ export class GameRoom extends Room<GameState> {
     console.log(`Generated ${this.state.collectibles.length} initial collectibles`);
   }
 
-  private generateInitialWalls() {
-
-    // Skipping level spec for now cause no clue how to do that
-    let wallCounter: number = 0;
-
-    // Calculate center offset for the 26x26 grid
-    const center = Math.floor(this.MAX_GRID_SIZE / 2);
-    const halfWidth = Math.floor(this.INITIAL_VISIBLE_WIDTH / 2);
-    const halfHeight = Math.floor(this.INITIAL_VISIBLE_HEIGHT / 2);
-    const minX = center - halfWidth;
-    const maxX = center + halfWidth - 1;
-    const minY = center - halfHeight;
-    const maxY = center + halfHeight - 1;
-
-    // Spawn walls based on config for stage 1
-    for (const rule of this.collectibleSpawnConfig.wall_spawn_rules) {
-        if (rule.first_stage !== 1) continue;
-
-        const counter = wallCounter || 0;
-        wallCounter = counter;
-
-        for (let i = 0; i < rule.num_initial; i++) {
-            const wall = new Wall();
-            const currentCount = wallCounter!;
-            wall.id = `WALL-${currentCount}`;
-            wallCounter = currentCount + 1;
-
-            let x: number, y: number;
-            do {
-                // Spawn at half-integer positions (between nodes) on x axis, but interger positions on y axis
-                x = minX + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH - 1)) + 0.5;
-                y = minY + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT));
-            } while (this.isPositionOccupied(x, y));
-
-            wall.x = x;
-            wall.y = y;
-
-            this.state.walls.push(wall);
-        }
-    }
-
-    console.log(`Generated ${this.state.walls.length} initial walls`);
-  }
-
   private generateInitialWallAnchors() {
 
     // Skipping level spec for now cause no clue how to do that
@@ -1263,10 +1227,10 @@ export class GameRoom extends Room<GameState> {
     const center = Math.floor(this.MAX_GRID_SIZE / 2);
     const halfWidth = Math.floor(this.INITIAL_VISIBLE_WIDTH / 2);
     const halfHeight = Math.floor(this.INITIAL_VISIBLE_HEIGHT / 2);
-    const minX = center - halfWidth;
-    const maxX = center + halfWidth - 1;
-    const minY = center - halfHeight;
-    const maxY = center + halfHeight - 1;
+    const minX = center - halfWidth + 1;
+    const maxX = center + halfWidth - 2;
+    const minY = center - halfHeight - 1;
+    const maxY = center + halfHeight;
 
     // Spawn wall anchors based on config for stage 1
     for (const rule of this.collectibleSpawnConfig.wall_anchor_spawn_rules) {
@@ -1286,10 +1250,28 @@ export class GameRoom extends Room<GameState> {
                 // Spawn at integer positions (on nodes)
                 x = minX + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH));
                 y = minY + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT));
-            } while (this.isPositionOccupied(x, y));
+            } while (this.isPositionOccupied(x, y) && this.isAnchorInRange(x, y));
 
             wallAnchor.x = x;
             wallAnchor.y = y;
+
+            // Choose wall layout to spawn around anchor
+            let layoutNum = Math.floor(this.rng.next() * 10);
+            let layout = this.wallLayouts[layoutNum];
+
+            let wallCounter = 0;
+
+            // Spawn walls based on layout
+            for(const [wallx, wally] of layout) {
+                const wall = new Wall();
+                wall.id = `WALL-${currentCount}-${wallCounter}`;
+                wallCounter += 1;
+
+                wall.x = wallAnchor.x + wallx;
+                wall.y = wallAnchor.y + wally;
+
+                this.state.walls.push(wall);
+            }
 
             this.state.wallAnchors.push(wallAnchor);
         }
@@ -1357,6 +1339,25 @@ export class GameRoom extends Room<GameState> {
     // Check if any collectible is at this position
     for (const collectible of this.state.collectibles) {
       if (collectible.x === x && collectible.y === y) return true;
+    }
+
+    // Check if any wall anchor is at this position
+    for (const wallAnchor of this.state.wallAnchors) {
+        if (wallAnchor.x === x && wallAnchor.y === y) return true;
+    }
+
+    // Check if any wall is at this position (or close, to prevent wall ends from being unoccupied positions)
+    for (const wall of this.state.walls) {
+        if ((wall.x === x && wall.y === y) || (wall.x === x + 0.5 && wall.y === y) || (wall.x === x && wall.y === y + 0.5)) return true;
+    }
+
+    return false;
+  }
+
+  private isAnchorInRange(x: number, y: number): boolean {
+    //check if any anchors are within 3 spaces
+    for (const wallAnchor of this.state.wallAnchor) {
+        if (wallAnchor.x >= x - 3 && wallAnchor.x <= x + 3 && wallAnchor.y >= y - 3 && wallAnchor.y <= y + 3) return true;
     }
 
     return false;
@@ -1514,7 +1515,34 @@ export class GameRoom extends Room<GameState> {
 
     return components;
   }
+    private isWallBetween(
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number
+    ): boolean {
+        return Array.from(this.state.walls).some((wall) => {
+            // Horizontal neighbor connection: (x, y) <-> (x + 1, y)
+            // Blocked by wall at x + 0.5, same y
+            if (y1 === y2 && Math.abs(x1 - x2) === 1) {
+                return (
+                    wall.x === Math.min(x1, x2) + 0.5 &&
+                    wall.y === y1
+                );
+            }
 
+            // Vertical neighbor connection: (x, y) <-> (x, y + 1)
+            // Blocked by wall at same x, y + 0.5
+            if (x1 === x2 && Math.abs(y1 - y2) === 1) {
+                return (
+                    wall.x === x1 &&
+                    wall.y === Math.min(y1, y2) + 0.5
+                );
+            }
+
+            return false;
+        });
+    }
   private bfs(
     startX: number,
     startY: number,
@@ -1545,11 +1573,15 @@ export class GameRoom extends Room<GameState> {
 
         if (visited.has(key)) continue;
 
-        const cell = this.state.gridColors.get(key);
-        if (cell && cell.color === color) {
-          visited.add(key);
-          queue.push(neighbor);
-        }
+          if (this.isWallBetween(current.x, current.y, neighbor.x, neighbor.y)) {
+              continue;
+          }
+
+          const cell = this.state.gridColors.get(key);
+          if (cell && cell.color === color) {
+              visited.add(key);
+              queue.push(neighbor);
+          }
       }
     }
 
