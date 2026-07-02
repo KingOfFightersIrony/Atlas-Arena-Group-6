@@ -23,17 +23,10 @@
       "num_subsequent": 4
     }
   ],
-  "wall_spawn_rules": [
-    {
-      "first_stage": 1,
-      "num_initial": 1,
-      "num_subsequent": 1
-    }
-  ],
   "wall_anchor_spawn_rules": [
     {
       "first_stage": 1,
-      "num_initial": 1,
+      "num_initial": 2,
       "num_subsequent": 1
     }
   ]
