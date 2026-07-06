@@ -1646,6 +1646,52 @@ export const GameScreen = ({
         {controlsOpen && <GameControls showPing={!isSoloMode} />}
       </div>
 
+      {/* TOOLS HUD: frosted polar chrome (match timer / stage chips) */}
+      <div className="absolute left-4 top-80 z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
+          <div
+              className="relative flex flex-col overflow-hidden rounded-none border border-solid bg-canvas/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-white/[0.06] backdrop-blur-[4px]"
+              style={{ borderColor: POLAR_HUD.border }}
+              role="status"
+              aria-live="polite"
+              data-ui="game-hud-panel"
+            >
+                <div
+                  id="tools-panel"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="tools-title"
+                  className={cn(
+                    "relative z-20 flex max-h-[min(70vh,22rem)] min-h-0 w-full shrink-0 flex-col gap-3 overflow-y-auto bg-transparent px-3 py-3"
+                  )}
+                >
+                    <div className="grid min-w-0 gap-1">
+                        <p
+                        id="tools-title"
+                        className="font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500"
+                        >
+                        Tools
+                        </p>
+                        <div className="w-full min-w-0">
+                          <div className="flex w-full min-w-0 items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => onBgMusicVolumeChange(bgMusicVolume > 0 ? 0 : 0.3)}
+                              className="shrink-0 text-slate-300 transition-colors hover:text-white"
+                              aria-label={bgMusicVolume > 0 ? "Mute music" : "Unmute music"}
+                            >
+                              {bgMusicVolume > 0 ? (
+                                <Volume2 className="size-10" aria-hidden />
+                              ) : (
+                                <VolumeX className="size-10" aria-hidden />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </div>
+
       {/* Stage Display - Top Center (polar blue chrome) */}
       <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2">
         {/* Outer glow — intensity scales with stage + bloom pulse on transition */}
