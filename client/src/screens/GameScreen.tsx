@@ -41,6 +41,9 @@ import {
   PLAYER_HEX,
   PLAYER_HEX_LOWER,
 } from "@/constants/playerColors";
+import squareanchor from '@/components/ui/squareanchor.png';
+import rotate1v2 from '@/components/ui/rotate1v2.png';
+import bracket from '@/components/ui/bracket.png';
 
 // Types
 type PlayerColor = "RED" | "GREEN" | "BLUE";
@@ -1647,7 +1650,7 @@ export const GameScreen = ({
       </div>
 
       {/* TOOLS HUD: frosted polar chrome (match timer / stage chips) */}
-      <div className="absolute left-4 top-80 z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
+      <div className="absolute left-4 top-[13rem] z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
           <div
               className="relative flex flex-col overflow-hidden rounded-none border border-solid bg-canvas/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-white/[0.06] backdrop-blur-[4px]"
               style={{ borderColor: POLAR_HUD.border }}
@@ -1671,21 +1674,87 @@ export const GameScreen = ({
                         >
                         Tools
                         </p>
+                        <p
+                        id="tools-title"
+                        className="mt-5 font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500"
+                        >
+                        Anchor Rotators
+                        </p>
                         <div className="w-full min-w-0">
-                          <div className="flex w-full min-w-0 items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => onBgMusicVolumeChange(bgMusicVolume > 0 ? 0 : 0.3)}
-                              className="shrink-0 text-slate-300 transition-colors hover:text-white"
-                              aria-label={bgMusicVolume > 0 ? "Mute music" : "Unmute music"}
-                            >
-                              {bgMusicVolume > 0 ? (
-                                <Volume2 className="size-10" aria-hidden />
-                              ) : (
-                                <VolumeX className="size-10" aria-hidden />
-                              )}
-                            </button>
+                          <img src={bracket} className="relative mx-auto mt-[5rem] w-[8rem] h-[2.5rem]" aria-hidden />
+                          <div className="relative mx-auto -mt-[5.75rem] size-20">
+                              <button
+                                type="button"
+                                className="absolute left-1/2 top-0 flex size-7 -translate-x-1/2 -rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                aria-label="Rotate anchor upward"
+                              >
+                                <img src={rotate1v2} className="size-7" aria-hidden />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="absolute right-0 top-1/2 flex size-7 -translate-y-1/2 rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                aria-label="Rotate anchor right"
+                              >
+                                <img src={squareanchor} className="size-7" aria-hidden />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="absolute bottom-0 left-1/2 flex size-7 -translate-x-1/2 rotate-[135deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                aria-label="Rotate anchor downward"
+                              >
+                                <img src={squareanchor} className="size-7" aria-hidden />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="absolute left-0 top-1/2 flex size-7 -translate-y-1/2 rotate-[225deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                aria-label="Rotate anchor left"
+                              >
+                                <img src={squareanchor} className="size-7" aria-hidden />
+                              </button>
+
+                              <p
+                                id="0deg-label"
+                                className="absolute left-[2.35rem] -top-5 font-montreal text-[9px] font-medium uppercase"
+                                >
+                                0&deg;
+                              </p>
+                              
+                              <p
+                                id="90deg-label"
+                                className="absolute -right-7 top-[2rem] font-montreal text-[9px] font-medium uppercase"
+                                >
+                                90&deg;
+                              </p>
+                              
+                              <p
+                                id="180deg-label"
+                                className="absolute left-[2.15rem] -bottom-5 font-montreal text-[9px] font-medium uppercase"
+                                >
+                                180&deg;
+                              </p>
+                              
+                              <p
+                                id="270deg-label"
+                                className="absolute -left-7 top-[2rem] font-montreal text-[9px] font-medium uppercase"
+                                >
+                                270&deg;
+                              </p>
                           </div>
+                          <p
+                            id="cost-label"
+                            className="relative mx-4 mt-5 font-montreal text-[9px] font-medium uppercase"
+                            >
+                            Cost: 2
+                          </p>
+                          <p
+                            id="used-label"
+                            className="relative mx-[6.25rem] -mt-[0.9rem] font-montreal text-[9px] font-medium uppercase"
+                            >
+                            Used: 
+                          </p>
                         </div>
                     </div>
                 </div>

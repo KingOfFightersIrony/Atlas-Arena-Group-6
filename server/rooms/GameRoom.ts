@@ -1227,10 +1227,10 @@ export class GameRoom extends Room<GameState> {
     const center = Math.floor(this.MAX_GRID_SIZE / 2);
     const halfWidth = Math.floor(this.INITIAL_VISIBLE_WIDTH / 2);
     const halfHeight = Math.floor(this.INITIAL_VISIBLE_HEIGHT / 2);
-    const minX = center - halfWidth + 1;
-    const maxX = center + halfWidth - 2;
-    const minY = center - halfHeight - 1;
-    const maxY = center + halfHeight;
+    const minX = center - halfWidth;
+    const maxX = center + halfWidth - 1;
+    const minY = center - halfHeight;
+    const maxY = center + halfHeight - 1;
 
     // Spawn wall anchors based on config for stage 1
     for (const rule of this.collectibleSpawnConfig.wall_anchor_spawn_rules) {
@@ -1248,8 +1248,8 @@ export class GameRoom extends Room<GameState> {
             let x: number, y: number;
             do {
                 // Spawn at integer positions (on nodes)
-                x = minX + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH));
-                y = minY + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT));
+                x = minX + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH - 2));
+                y = minY + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT - 2));
             } while (this.isPositionOccupied(x, y) && this.isAnchorInRange(x, y));
 
             wallAnchor.x = x;
