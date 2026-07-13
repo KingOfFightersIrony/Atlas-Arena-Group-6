@@ -60,6 +60,7 @@ interface Wall {
     x: number;
     y: number;
     id: string;
+    orientation: "horizontal" | "vertical";
 }
 
 interface WallAnchor {
@@ -289,6 +290,7 @@ const Index = () => {
             x: wall.x,
             y: wall.y,
             id: wall.id
+            orientation: wall.orientation as "horizontal" | "vertical",
         });
     });
 

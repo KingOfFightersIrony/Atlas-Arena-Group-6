@@ -4,23 +4,26 @@ import { ThickEdges } from './OutlineMaterial';
 
 type WallEntityProps = {
     position?: [number, number, number];
-    gridx: number;
+    gridX?: number;
+    orientation: "horizontal" | "vertical";
 };
 
-const wallColor = "#ff0000";
-const verticalRotation = [0, 0, 0];
-const horizontalRotation = [0, -Math.PI / 2, 0];
+const verticalRotation: [number, number, number] = [0, 0, 0];
+const horizontalRotation: [number, number, number] = [0, -Math.PI / 2, 0];
 
-export function WallEntity({ position = [0, 0, 0], gridx }: WallEntityProps) {
-    const cubeRef = useRef<THREE.Mesh>(null);
+export function WallEntity({
+    position = [0, 0, 0],
+    orientation,
+}: WallEntityProps) {
+    const currRotation =
+        orientation === "horizontal"
+            ? horizontalRotation
+            : verticalRotation;
 
-    let currRotation = verticalRotation;
-    if ((gridx % 1) == 0) currRotation = horizontalRotation;
-
-    return(
-        <mesh ref={cubeRef} position={position} rotation={currRotation}>
-            <boxGeometry args={[0.1,1,2.6]} />
-            <meshStandardMaterial color={wallColor} />
+    return (
+        <mesh position={position} rotation={currRotation}>
+            <boxGeometry args={[0.25, 1, 2]} />
+            <meshStandardMaterial color="#ff0000" />
         </mesh>
     );
 }

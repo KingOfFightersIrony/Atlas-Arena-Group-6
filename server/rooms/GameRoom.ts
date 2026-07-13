@@ -1522,19 +1522,19 @@ export class GameRoom extends Room<GameState> {
         y2: number
     ): boolean {
         return Array.from(this.state.walls).some((wall) => {
-            // Horizontal neighbor connection: (x, y) <-> (x + 1, y)
-            // Blocked by wall at x + 0.5, same y
-            if (y1 === y2 && Math.abs(x1 - x2) === 1) {
+            if (wall.orientation === "vertical") {
                 return (
+                    y1 === y2 &&
+                    Math.abs(x1 - x2) === 1 &&
                     wall.x === Math.min(x1, x2) + 0.5 &&
                     wall.y === y1
                 );
             }
 
-            // Vertical neighbor connection: (x, y) <-> (x, y + 1)
-            // Blocked by wall at same x, y + 0.5
-            if (x1 === x2 && Math.abs(y1 - y2) === 1) {
+            if (wall.orientation === "horizontal") {
                 return (
+                    x1 === x2 &&
+                    Math.abs(y1 - y2) === 1 &&
                     wall.x === x1 &&
                     wall.y === Math.min(y1, y2) + 0.5
                 );

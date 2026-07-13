@@ -75,9 +75,10 @@ interface Collectible {
 }
 
 interface Wall {
-  x: number;
-  y: number;
-  id: string;
+    x: number;
+    y: number;
+    id: string;
+    orientation: "horizontal" | "vertical";
 }
 
 interface WallAnchor {
@@ -2481,7 +2482,7 @@ export const GameScreen = ({
             {walls.map((wall) => {
               const pos = getVisualPos(wall.x, wall.y, -2.0);
               return (
-                <WallEntity key={wall.id} position={pos} gridx={wall.x} />
+                  <WallEntity key={wall.id} position={pos} gridx={wall.x} orientation={wall.orientation} />
               );
             })}
 
