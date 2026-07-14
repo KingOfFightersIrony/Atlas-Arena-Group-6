@@ -4,7 +4,7 @@ import { ThickEdges } from './OutlineMaterial';
 
 type WallEntityProps = {
     position?: [number, number, number];
-    gridX?: number;
+    gridx?: number;
     orientation: "horizontal" | "vertical";
 };
 
@@ -13,16 +13,23 @@ const horizontalRotation: [number, number, number] = [0, -Math.PI / 2, 0];
 
 export function WallEntity({
     position = [0, 0, 0],
-    orientation,
+    gridx,
+    orientation
 }: WallEntityProps) {
+    orientation =
+        gridx % 1 === 0
+            ? "horizontal"
+            : "vertical";
+
     const currRotation =
         orientation === "horizontal"
             ? horizontalRotation
             : verticalRotation;
 
+
     return (
         <mesh position={position} rotation={currRotation}>
-            <boxGeometry args={[0.25, 1, 2]} />
+            <boxGeometry args={[0.1, 1, 2.6]} />
             <meshStandardMaterial color="#ff0000" />
         </mesh>
     );

@@ -289,7 +289,7 @@ const Index = () => {
         newWalls.push({
             x: wall.x,
             y: wall.y,
-            id: wall.id
+            id: wall.id,
             orientation: wall.orientation as "horizontal" | "vertical",
         });
     });

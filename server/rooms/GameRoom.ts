@@ -1250,7 +1250,7 @@ export class GameRoom extends Room<GameState> {
                 // Spawn at integer positions (on nodes)
                 x = minX + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH - 2));
                 y = minY + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT - 2));
-            } while (this.isPositionOccupied(x, y) && this.isAnchorInRange(x, y));
+            } while (this.isPositionOccupied(x, y) || this.isAnchorInRange(x, y));
 
             wallAnchor.x = x;
             wallAnchor.y = y;
@@ -1341,14 +1341,15 @@ export class GameRoom extends Room<GameState> {
       if (collectible.x === x && collectible.y === y) return true;
     }
 
+    // Commented out for now to allow things to spawn on top of wall anchors
     // Check if any wall anchor is at this position
-    for (const wallAnchor of this.state.wallAnchors) {
-        if (wallAnchor.x === x && wallAnchor.y === y) return true;
-    }
+    //for (const wallAnchor of this.state.wallAnchors) {
+    //    if (wallAnchor.x === x && wallAnchor.y === y) return true;
+    //}
 
     // Check if any wall is at this position (or close, to prevent wall ends from being unoccupied positions)
     for (const wall of this.state.walls) {
-        if ((wall.x === x && wall.y === y) || (wall.x === x + 0.5 && wall.y === y) || (wall.x === x && wall.y === y + 0.5)) return true;
+        if ((wall.x === x && wall.y === y) || ((wall.x === x + 0.5 || wall.x === x - 0.5) && wall.y === y) || (wall.x === x && (wall.y === y + 0.5 || wall.y === y - 0.5))) return true;
     }
 
     return false;
@@ -1356,7 +1357,7 @@ export class GameRoom extends Room<GameState> {
 
   private isAnchorInRange(x: number, y: number): boolean {
     //check if any anchors are within 3 spaces
-    for (const wallAnchor of this.state.wallAnchor) {
+    for (const wallAnchor of this.state.wallAnchors) {
         if (wallAnchor.x >= x - 3 && wallAnchor.x <= x + 3 && wallAnchor.y >= y - 3 && wallAnchor.y <= y + 3) return true;
     }
 
@@ -1649,8 +1650,69 @@ export class GameRoom extends Room<GameState> {
     const maxY = center + halfHeight - 1;
 
     const stagesAdvanced = newStage - previousStage;
+    let totalWallAnchorsAdded = 0;
+
+    // Spawn wall anchors for each stage advanced (every other stage)
+    for(let s = 0; s < stagesAdvanced; s++) {
+        const currentStage = previousStage + s + 1;
+
+        // Spawn wall anchors based on config
+        for (const rule of this.collectibleSpawnConfig.wall_anchor_spawn_rules) {
+            if (currentStage < rule.first_stage) continue;
+            
+            // Spawn on every other stage (evens or odds depending on first stage)
+            if (rule.first_stage % 2 == 0) {
+                if (currentStage % 2 == 1) continue;
+            }
+            else {
+                if (currentStage % 2 == 0) continue;
+            }
+
+            // For the first_stage, use num_initial, otherwise use num_subsequent
+            const numToSpawn = currentStage === rule.first_stage ? rule.num_initial : rule.num_subsequent;
+
+            for (let i = 0; i < numToSpawn; i++) {
+                const wallAnchor = new WallAnchor();
+                wallAnchor.id = `WALLANCHOR-${this.state.wallAnchors.length}`;
+
+                let x: number, y: number;
+                do {
+                    // Spawn at integer positions (on nodes)
+                    x = minX + 1 + Math.floor(this.rng.next() * (this.state.gridWidth - 2));
+                    y = minY + 1 + Math.floor(this.rng.next() * (this.state.gridHeight - 2));
+                } while (this.isPositionOccupied(x, y) || this.isAnchorInRange(x, y));
+
+                wallAnchor.x = x;
+                wallAnchor.y = y;
+
+                // Choose wall layout to spawn around anchor
+                let layoutNum = Math.floor(this.rng.next() * 10);
+                let layout = this.wallLayouts[layoutNum];
+
+                let wallCounter = 0;
+
+                // Spawn walls based on layout
+                for(const [wallx, wally] of layout) {
+                    const wall = new Wall();
+                    wall.id = `WALL-${this.state.wallAnchors.length}-${wallCounter}`;
+                    wallCounter += 1;
+
+                    wall.x = wallAnchor.x + wallx;
+                    wall.y = wallAnchor.y + wally;
+
+                    this.state.walls.push(wall);
+                }
+
+                this.state.wallAnchors.push(wallAnchor);
+                totalWallAnchorsAdded++;
+            }
+        }
+
+    }
+
     let totalCollectiblesAdded = 0;
 
+    // Spawn collectibles for each stage advanced
     for (let s = 0; s < stagesAdvanced; s++) {
       const currentStage = previousStage + s + 1;
 
@@ -1774,7 +1836,7 @@ export class GameRoom extends Room<GameState> {
       this.spawnEnemiesForStage(currentStage);
     }
 
-    console.log(`Stage ${newStage}: Visible area expanded from ${oldGridWidth}x${oldGridHeight} to ${this.state.gridWidth}x${this.state.gridHeight}, added ${totalCollectiblesAdded} new collectibles`);
+    console.log(`Stage ${newStage}: Visible area expanded from ${oldGridWidth}x${oldGridHeight} to ${this.state.gridWidth}x${this.state.gridHeight}, added ${totalCollectiblesAdded} new collectibles, added ${totalWallAnchorsAdded} new wall anchors`);
   }
 
   private startClearBoardVoteTimer() {
