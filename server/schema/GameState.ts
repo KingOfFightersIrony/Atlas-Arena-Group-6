@@ -36,12 +36,16 @@ export class Wall extends Schema {
 	@type("number") x: number = 0;
 	@type("number") y: number = 0;
 	@type("string") id: string = "";
+	@type("string") orientation: "horizontal" | "vertical" = "horizontal";
 }
 
 export class WallAnchor extends Schema {
+	@type("string") id: string = "";
 	@type("number") x: number = 0;
 	@type("number") y: number = 0;
-	@type("string") id: string = "";
+
+	@type("number") layoutIndex: number = 0;
+	@type("number") rotation: number = 0;
 }
 
 export type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding" | "prismatic";

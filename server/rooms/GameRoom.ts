@@ -44,7 +44,10 @@ interface DevPaintNodeMessage {
   y: number;
   color: string;
 }
-
+interface RotateWallAnchorMessage {
+    anchorId: string;
+    rotation: 0 | 90 | 180 | 270;
+}
 interface ClearBoardVote {
   sessionId: string;
   timestamp: number;
@@ -413,6 +416,10 @@ export class GameRoom extends Room<GameState> {
 
       console.log(`[Dev Mode] Cleared node at (${x}, ${y})`);
     });
+    //Handle Wall Anchor Rotation
+      this.onMessage("rotateWallAnchor", (_client, message: RotateWallAnchorMessage) => {
+          this.rotateWallAnchor(message.anchorId, message.rotation);
+      });
 
     // Handle clear board vote
     this.onMessage("clearBoard", (client) => {
@@ -1256,8 +1263,11 @@ export class GameRoom extends Room<GameState> {
             wallAnchor.y = y;
 
             // Choose wall layout to spawn around anchor
-            let layoutNum = Math.floor(this.rng.next() * 10);
-            let layout = this.wallLayouts[layoutNum];
+            const layoutNum = Math.floor(this.rng.next() * this.wallLayouts.length);
+            const layout = this.wallLayouts[layoutNum];
+
+            wallAnchor.layoutIndex = layoutNum;
+            wallAnchor.rotation = 0;
 
             let wallCounter = 0;
 
@@ -1269,6 +1279,9 @@ export class GameRoom extends Room<GameState> {
 
                 wall.x = wallAnchor.x + wallx;
                 wall.y = wallAnchor.y + wally;
+                wall.orientation = Number.isInteger(wall.x)
+                    ? "horizontal"
+                    : "vertical";
 
                 this.state.walls.push(wall);
             }
@@ -1278,7 +1291,70 @@ export class GameRoom extends Room<GameState> {
     }
 
     console.log(`Generated ${this.state.wallAnchors.length} initial wall anchors`);
-  }
+    }
+
+    private rotateOffset(
+        x: number,
+        y: number,
+        rotation: 0 | 90 | 180 | 270
+    ): [number, number] {
+        switch (rotation) {
+            case 0:
+                return [x, y];
+            case 90:
+                return [-y, x];
+            case 180:
+                return [-x, -y];
+            case 270:
+                return [y, -x];
+        }
+    }
+
+    private rotateWallAnchor(
+        anchorId: string,
+        rotation: 0 | 90 | 180 | 270
+    ): void {
+        const anchor = this.state.wallAnchors.find((a) => a.id === anchorId);
+        if (!anchor) return;
+
+        anchor.rotation = rotation;
+
+        const anchorNumber = anchor.id.replace("WALLANCHOR-", "");
+        const wallPrefix = `WALL-${anchorNumber}-`;
+
+        // Remove old walls for this anchor.
+        for (let i = this.state.walls.length - 1; i >= 0; i--) {
+            if (this.state.walls[i].id.startsWith(wallPrefix)) {
+                this.state.walls.splice(i, 1);
+            }
+        }
+
+        const layout = this.wallLayouts[anchor.layoutIndex];
+        if (!layout) return;
+
+        layout.forEach(([offsetX, offsetY], index) => {
+            const [rotatedX, rotatedY] = this.rotateOffset(
+                offsetX,
+                offsetY,
+                rotation
+            );
+
+            const wall = new Wall();
+            wall.id = `${wallPrefix}${index}`;
+            wall.x = anchor.x + rotatedX;
+            wall.y = anchor.y + rotatedY;
+
+            // Your display/collision convention:
+            // whole x -> horizontal, half x -> vertical
+            wall.orientation = Number.isInteger(wall.x)
+                ? "horizontal"
+                : "vertical";
+
+            this.state.walls.push(wall);
+        });
+
+        this.calculateScores();
+    }
 
   private spawnCluesFromLevelSpec(stage: number) {
     if (!this.levelSpec) return;

@@ -4,11 +4,13 @@ import { ThickEdges } from './OutlineMaterial';
 
 type WallAnchorEntityProps = {
     position?: [number, number, number];
+    selected?: boolean;
+    onClick?: () => void;
 };
 
 const wallAnchorColor = "#550000";
 
-export function WallAnchorEntity({ position = [0, 0, 0] }: WallAnchorEntityProps) {
+export function WallAnchorEntity({ position = [0, 0, 0], selected = false, onClick, }: WallAnchorEntityProps) {
     const rightGeometry = useMemo(() => {
         const shape = new THREE.Shape();
 
@@ -126,43 +128,57 @@ export function WallAnchorEntity({ position = [0, 0, 0] }: WallAnchorEntityProps
         return geo;
     }, []);
 
+    const color = selected ? "#ff3333" : wallAnchorColor;
+
     return(
-        <group>
-            <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
+        <group
+            position={position}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+            }}
+        >
+
+            <group rotation={[-Math.PI / 2, 0, 0]}>
                 {/* right mesh */}
                 <mesh geometry={rightGeometry}>
                     <meshStandardMaterial
-                        color={wallAnchorColor}
+                        color={color}
                         roughness={0.2}
                         metalness={0.8}
-                        emissive={wallAnchorColor}
+                        emissive={color}
                         emissiveIntensity={0.2}
                     />
                 </mesh>
+
                 {/* Thick edge outline */}
                 <ThickEdges geometry={rightGeometry} thresholdAngle={15} />
+
                 {/* left mesh */}
                 <mesh geometry={leftGeometry}>
                     <meshStandardMaterial
-                        color={wallAnchorColor}
+                        color={color}
                         roughness={0.2}
                         metalness={0.8}
-                        emissive={wallAnchorColor}
+                        emissive={color}
                         emissiveIntensity={0.2}
                     />
                 </mesh>
+
                 {/* Thick edge outline */}
                 <ThickEdges geometry={leftGeometry} thresholdAngle={15} />
+
                 {/* bottom mesh */}
                 <mesh geometry={bottomGeometry}>
                     <meshStandardMaterial
-                        color={wallAnchorColor}
+                        color={color}
                         roughness={0.2}
                         metalness={0.8}
-                        emissive={wallAnchorColor}
+                        emissive={color}
                         emissiveIntensity={0.2}
                     />
                 </mesh>
+
                 {/* Thick edge outline */}
                 <ThickEdges geometry={bottomGeometry} thresholdAngle={15} />
             </group>

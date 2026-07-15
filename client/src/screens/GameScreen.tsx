@@ -601,6 +601,7 @@ export const GameScreen = ({
   const [controlsOpen, setControlsOpen] = useState(false);
   const [predictedPos, setPredictedPos] = useState<{ x: number, y: number } | null>(null);
   const [predictedGridColors, setPredictedGridColors] = useState<Map<string, PlayerColor | "clear">>(new Map());
+  const [selectedWallAnchorId, setSelectedWallAnchorId] = useState<string | null>(null);
   const settingsCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const SETTINGS_CLOSE_MS = 300;
 
@@ -864,6 +865,7 @@ export const GameScreen = ({
     const offAbandonUpdate = room.onMessage("abandonGameVoteUpdate", handleAbandonVoteUpdate);
     const offAbandonExpired = room.onMessage("abandonGameVoteExpired", handleAbandonVoteExpired);
     const offGameAbandoned = room.onMessage("gameAbandoned", handleGameAbandoned);
+
 
     return () => {
       [
@@ -1316,7 +1318,27 @@ export const GameScreen = ({
     const colorLower = COLOR_MAP_LOWER[collectibleColor as PlayerColor];
     if (!colorLower) return getPlayerHex("GREEN");
     return getPlayerHex(colorLower.toUpperCase() as PlayerColor);
-  };
+    };
+
+    const rotateSelectedAnchor = (rotation: 0 | 90 | 180 | 270) => {
+        if (!selectedWallAnchorId) {
+            toast.info("Select a wall anchor first.");
+            return;
+        }
+        if (!room) {
+            toast.error("Room is not connected.");
+            return;
+        }
+
+        console.log("Sending rotateWallAnchor", {
+            anchorId: selectedWallAnchorId,
+            rotation,
+        });
+        room?.send("rotateWallAnchor", {
+            anchorId: selectedWallAnchorId,
+            rotation,
+        });
+    };
 
   return (
     <div className="isolate w-full h-screen relative overflow-hidden bg-canvas">
@@ -1684,16 +1706,19 @@ export const GameScreen = ({
                         <div className="w-full min-w-0">
                           <img src={bracket} className="relative mx-auto mt-[5rem] w-[8rem] h-[2.5rem]" aria-hidden />
                           <div className="relative mx-auto -mt-[5.75rem] size-20">
-                              <button
-                                type="button"
-                                className="absolute left-1/2 top-0 flex size-7 -translate-x-1/2 -rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
-                                aria-label="Rotate anchor upward"
-                              >
-                                <img src={rotate1v2} className="size-7" aria-hidden />
-                              </button>
+                               <button
+                                   type="button"
+                                   onClick={() => rotateSelectedAnchor(0)}
+                                   className="absolute left-1/2 top-0 flex size-7 -translate-x-1/2 -rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                   aria-label="Rotate selected anchor to 0 degrees"
+                                  >
+                                 <img src={rotate1v2} className="size-7" aria-hidden />
+                             </button>
+
 
                               <button
                                 type="button"
+                                onClick={() => rotateSelectedAnchor(90)}
                                 className="absolute right-0 top-1/2 flex size-7 -translate-y-1/2 rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
                                 aria-label="Rotate anchor right"
                               >
@@ -1702,6 +1727,7 @@ export const GameScreen = ({
 
                               <button
                                 type="button"
+                                onClick={() => rotateSelectedAnchor(180)}
                                 className="absolute bottom-0 left-1/2 flex size-7 -translate-x-1/2 rotate-[135deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
                                 aria-label="Rotate anchor downward"
                               >
@@ -1710,6 +1736,7 @@ export const GameScreen = ({
 
                               <button
                                 type="button"
+                                onClick={() => rotateSelectedAnchor(270)}
                                 className="absolute left-0 top-1/2 flex size-7 -translate-y-1/2 rotate-[225deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
                                 aria-label="Rotate anchor left"
                               >
@@ -2488,11 +2515,21 @@ export const GameScreen = ({
 
             {/* WallAnchors */}
             {wallAnchors.map((wallAnchor) => {
-              const pos = getVisualPos(wallAnchor.x, wallAnchor.y, -2.0);
-              return (
-                <WallAnchorEntity key={wallAnchor.id} position={pos} />
-              );
-            })}
+               const pos = getVisualPos(wallAnchor.x, wallAnchor.y, -2.0);
+               const selected = selectedWallAnchorId === wallAnchor.id;
+
+               return (
+                  <WallAnchorEntity
+                   key={wallAnchor.id}
+                   position={pos}
+                   selected={selected}
+                   onClick={() => {
+                       console.log("Selected wall anchor:", wallAnchor.id);
+                       setSelectedWallAnchorId(wallAnchor.id);
+                     }}
+                   />
+                  );
+             })}
 
             {/* Enemies */}
             {enemies.map((enemy) => {
