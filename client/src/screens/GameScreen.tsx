@@ -1673,7 +1673,7 @@ export const GameScreen = ({
       </div>
 
       {/* TOOLS HUD: frosted polar chrome (match timer / stage chips) */}
-      <div className="absolute left-4 top-[13rem] z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
+      <div className="absolute left-4 bottom-[4rem] z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
           <div
               className="relative flex flex-col overflow-hidden rounded-none border border-solid bg-canvas/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-white/[0.06] backdrop-blur-[4px]"
               style={{ borderColor: POLAR_HUD.border }}
@@ -1775,13 +1775,7 @@ export const GameScreen = ({
                             id="cost-label"
                             className="relative mx-4 mt-5 font-montreal text-[9px] font-medium uppercase"
                             >
-                            Cost: 2
-                          </p>
-                          <p
-                            id="used-label"
-                            className="relative mx-[6.25rem] -mt-[0.9rem] font-montreal text-[9px] font-medium uppercase"
-                            >
-                            Used: 
+                            
                           </p>
                         </div>
                     </div>

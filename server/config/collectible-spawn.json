@@ -19,15 +19,15 @@
     {
       "clue_type": "polyomino",
       "first_stage": 3,
-      "num_initial": 7,
-      "num_subsequent": 4
+      "num_initial": 2,
+      "num_subsequent": 2
     }
   ],
   "wall_anchor_spawn_rules": [
     {
       "first_stage": 1,
       "num_initial": 2,
-      "num_subsequent": 1
+      "num_subsequent": 2
     }
   ]
 }
