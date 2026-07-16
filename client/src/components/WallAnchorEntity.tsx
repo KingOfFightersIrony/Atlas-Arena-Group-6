@@ -140,6 +140,12 @@ export function WallAnchorEntity({ position = [0, 0, 0], selected = false, onCli
         >
 
             <group rotation={[-Math.PI / 2, 0, 0]}>
+                {/* click box mesh */}
+                <mesh>
+                    <boxGeometry args={[2, 2, 2]} />
+                    <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+                </mesh>
+            
                 {/* right mesh */}
                 <mesh geometry={rightGeometry}>
                     <meshStandardMaterial
