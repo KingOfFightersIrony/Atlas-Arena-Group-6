@@ -1257,7 +1257,7 @@ export class GameRoom extends Room<GameState> {
                 // Spawn at integer positions (on nodes)
                 x = minX + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_WIDTH - 2));
                 y = minY + 1 + Math.floor(this.rng.next() * (this.INITIAL_VISIBLE_HEIGHT - 2));
-            } while (this.isPositionOccupied(x, y) || this.isAnchorInRange(x, y));
+            } while (this.isAnchorInRange(x, y));
 
             wallAnchor.x = x;
             wallAnchor.y = y;
@@ -1756,7 +1756,7 @@ export class GameRoom extends Room<GameState> {
                     // Spawn at integer positions (on nodes)
                     x = minX + 1 + Math.floor(this.rng.next() * (this.state.gridWidth - 2));
                     y = minY + 1 + Math.floor(this.rng.next() * (this.state.gridHeight - 2));
-                } while (this.isPositionOccupied(x, y) || this.isAnchorInRange(x, y));
+                } while (this.isAnchorInRange(x, y));
 
                 wallAnchor.x = x;
                 wallAnchor.y = y;

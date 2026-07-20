@@ -1673,10 +1673,10 @@ export const GameScreen = ({
       </div>
 
       {/* TOOLS HUD: frosted polar chrome (match timer / stage chips) */}
-      <div className="absolute left-4 bottom-[4rem] z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
+      <div className="absolute left-[17rem] bottom-[1rem] z-20 flex w-[min(11.5rem,calc(100vw-2rem))] flex-col gap-2">
           <div
               className="relative flex flex-col overflow-hidden rounded-none border border-solid bg-canvas/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-white/[0.06] backdrop-blur-[4px]"
-              style={{ borderColor: POLAR_HUD.border }}
+              style={{ borderColor: "rgba(255, 0, 0, 1)" }}
               role="status"
               aria-live="polite"
               data-ui="game-hud-panel"
@@ -1693,25 +1693,25 @@ export const GameScreen = ({
                     <div className="grid min-w-0 gap-1">
                         <p
                         id="tools-title"
-                        className="font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500"
+                        className="font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-red-500"
                         >
                         Tools
                         </p>
                         <p
                         id="tools-title"
-                        className="mt-5 font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500"
+                        className="mt-5 font-montreal text-[9px] font-medium uppercase tracking-[0.12em] text-red-500"
                         >
                         Anchor Rotators
                         </p>
                         <div className="w-full min-w-0">
                           <img src={bracket} className="relative mx-auto mt-[5rem] w-[8rem] h-[2.5rem]" aria-hidden />
                           <div className="relative mx-auto -mt-[5.75rem] size-20">
-                               <button
-                                   type="button"
-                                   onClick={() => rotateSelectedAnchor(0)}
-                                   className="absolute left-1/2 top-0 flex size-7 -translate-x-1/2 -rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
-                                   aria-label="Rotate selected anchor to 0 degrees"
-                                  >
+                             <button
+                                type="button"
+                                onClick={() => rotateSelectedAnchor(0)}
+                                className="absolute left-1/2 top-0 flex size-7 -translate-x-1/2 -rotate-[45deg] items-center justify-center rounded-none border border-white/10 bg-canvas/40 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                aria-label="Rotate selected anchor to 0 degrees"
+                             >
                                  <img src={rotate1v2} className="size-7" aria-hidden />
                              </button>
 
@@ -1745,28 +1745,28 @@ export const GameScreen = ({
 
                               <p
                                 id="0deg-label"
-                                className="absolute left-[2.35rem] -top-5 font-montreal text-[9px] font-medium uppercase"
+                                className="absolute left-[2.35rem] -top-5 font-montreal text-[9px] font-medium uppercase text-red-500"
                                 >
                                 0&deg;
                               </p>
                               
                               <p
                                 id="90deg-label"
-                                className="absolute -right-7 top-[2rem] font-montreal text-[9px] font-medium uppercase"
+                                className="absolute -right-7 top-[2rem] font-montreal text-[9px] font-medium uppercase text-red-500"
                                 >
                                 90&deg;
                               </p>
                               
                               <p
                                 id="180deg-label"
-                                className="absolute left-[2.15rem] -bottom-5 font-montreal text-[9px] font-medium uppercase"
+                                className="absolute left-[2.15rem] -bottom-5 font-montreal text-[9px] font-medium uppercase text-red-500"
                                 >
                                 180&deg;
                               </p>
                               
                               <p
                                 id="270deg-label"
-                                className="absolute -left-7 top-[2rem] font-montreal text-[9px] font-medium uppercase"
+                                className="absolute -left-7 top-[2rem] font-montreal text-[9px] font-medium uppercase text-red-500"
                                 >
                                 270&deg;
                               </p>
