@@ -1704,8 +1704,7 @@ export const GameScreen = ({
                         Anchor Rotators
                         </p>
                         <div className="w-full min-w-0">
-                          <img src={bracket} className="relative mx-auto mt-[5rem] w-[8rem] h-[2.5rem]" aria-hidden />
-                          <div className="relative mx-auto -mt-[5.75rem] size-20">
+                          <div className="relative mx-auto mt-[2rem] size-20">
                              <button
                                 type="button"
                                 onClick={() => rotateSelectedAnchor(0)}
@@ -1714,7 +1713,6 @@ export const GameScreen = ({
                              >
                                  <img src={rotate1v2} className="size-7" aria-hidden />
                              </button>
-
 
                               <button
                                 type="button"
