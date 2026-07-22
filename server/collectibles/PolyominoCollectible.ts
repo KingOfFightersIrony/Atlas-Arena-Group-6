@@ -146,7 +146,13 @@ export class PolyominoCollectible extends BaseCollectible {
     collectibleX: number,
     collectibleY: number,
     requiredColor: PlayerColor,
-    gridColors: MapSchema<GridCell>
+    gridColors: MapSchema<GridCell>,
+    isWallBetween?: (
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number
+    ) => boolean
   ): boolean {
     // Convert collectible position to integer grid coordinates
     const clueGridX = Math.floor(collectibleX);
@@ -160,6 +166,9 @@ export class PolyominoCollectible extends BaseCollectible {
       return false;
     }
 
+    // Collect absolute shape cells
+    const shapeCells: Array<{ x: number; y: number }> = [];
+
     // Check all shape cells have the required color
     for (const [sx, sy] of shape) {
       const gridX = offsetX + sx;
@@ -170,6 +179,50 @@ export class PolyominoCollectible extends BaseCollectible {
       if (!cell || cell.color !== requiredColor) {
         return false;
       }
+
+      shapeCells.push({ x: gridX, y: gridY });
+    }
+
+    if (isWallBetween && !this.areShapeCellsConnectedWithoutWalls(shapeCells, isWallBetween)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if there are any walls between any of the shape cells
+   */
+  private areShapeCellsConnectedWithoutWalls(
+    cells: Array<{ x: number; y: number }>,
+    isWallBetween: (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+    ) => boolean
+  ): boolean {
+    if (cells.length <= 1) return true;
+
+    const cellSet = new Set(cells.map((cell) => `${cell.x},${cell.y}`));
+
+    for (const cell of cells) {
+        const neighbors = [
+            { x: cell.x - 1, y: cell.y },
+            { x: cell.x + 1, y: cell.y },
+            { x: cell.x, y: cell.y - 1 },
+            { x: cell.x, y: cell.y + 1 },
+        ];
+
+        for (const neighbor of neighbors) {
+            const key = `${neighbor.x},${neighbor.y}`;
+
+            if (!cellSet.has(key)) continue;
+
+            if (isWallBetween(cell.x, cell.y, neighbor.x, neighbor.y)) {
+                return false;
+            }
+        }
     }
 
     return true;
@@ -213,7 +266,8 @@ export class PolyominoCollectible extends BaseCollectible {
             collectible.x,
             collectible.y,
             color,
-            gridColors
+            gridColors,
+            context.isWallBetween
           )) {
             return true;
           }

@@ -7,6 +7,13 @@ export interface CollectibleScoreContext {
   allCollectibles: Collectible[];
   color: PlayerColor;
   components: Array<Array<{ x: number; y: number }>>;
+
+  isWallBetween?: (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ) => boolean;
 }
 
 export interface SpawnValidationContext {

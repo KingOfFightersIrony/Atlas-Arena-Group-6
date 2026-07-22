@@ -84,7 +84,7 @@ export class NetworkCollectible extends BaseCollectible {
     let cluesInNetwork = networksInComponent.length;
     if (cluesInNetwork < 2) return 0;
 
-    if (this.checkCluesAtEndpoints(myComponent, componentSet, networksInComponent)) {
+    if (this.checkCluesAtEndpoints(myComponent, componentSet, networksInComponent, context.isWallBetween)) {
       cluesInNetwork += this.goldBonus;
     }
 
@@ -154,35 +154,54 @@ export class NetworkCollectible extends BaseCollectible {
       return componentSet.has(cKey);
     });
 
-    return this.checkCluesAtEndpoints(myComponent, componentSet, networksInComponent);
+    return this.checkCluesAtEndpoints(myComponent, componentSet, networksInComponent, context.isWallBetween);
   }
 
   private checkCluesAtEndpoints(
     component: Array<{ x: number; y: number }>,
     componentSet: Set<string>,
-    networksInComponent: Array<{ x: number; y: number }>
+    networksInComponent: Array<{ x: number; y: number }>,
+    isWallBetween?: (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+    ) => boolean
   ): boolean {
     const networkSet = new Set(networksInComponent.map((c) => `${c.x},${c.y}`));
     const directions = [
-      { dx: 1, dy: 0 },
-      { dx: -1, dy: 0 },
-      { dx: 0, dy: 1 },
-      { dx: 0, dy: -1 },
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 },
     ];
 
     for (const cell of component) {
-      let degree = 0;
-      for (const dir of directions) {
-        if (componentSet.has(`${cell.x + dir.dx},${cell.y + dir.dy}`)) {
-          degree++;
-        }
-      }
-      const isEndpoint = degree === 1;
-      const hasClue = networkSet.has(`${cell.x},${cell.y}`);
+    let degree = 0;
 
-      if (isEndpoint !== hasClue) {
+    for (const dir of directions) {
+        const neighborX = cell.x + dir.dx;
+        const neighborY = cell.y + dir.dy;
+        const neighborKey = `${neighborX},${neighborY}`;
+
+        if (!componentSet.has(neighborKey)) continue;
+
+        if (
+        isWallBetween &&
+        isWallBetween(cell.x, cell.y, neighborX, neighborY)
+        ) {
+        continue;
+        }
+
+        degree++;
+    }
+
+    const isEndpoint = degree === 1;
+    const hasClue = networkSet.has(`${cell.x},${cell.y}`);
+
+    if (isEndpoint !== hasClue) {
         return false;
-      }
+    }
     }
 
     return true;

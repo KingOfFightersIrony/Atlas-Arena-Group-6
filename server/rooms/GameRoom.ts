@@ -1477,6 +1477,7 @@ export class GameRoom extends Room<GameState> {
           allCollectibles: allCollectiblesList,
           color,
           components,
+          isWallBetween: this.isWallBetween.bind(this),
         });
         if (collectible.score !== score) {
           collectible.score = score;
@@ -1498,6 +1499,7 @@ export class GameRoom extends Room<GameState> {
         allCollectibles: allCollectiblesList,
         color: "RED", // Color doesn't matter for neutral collectibles
         components: [],
+        isWallBetween: this.isWallBetween.bind(this),
       });
       if (collectible.score !== score) {
         collectible.score = score;
@@ -1765,6 +1767,9 @@ export class GameRoom extends Room<GameState> {
                 let layoutNum = Math.floor(this.rng.next() * 10);
                 let layout = this.wallLayouts[layoutNum];
 
+                wallAnchor.layoutIndex = layoutNum;
+                wallAnchor.rotation = 0;
+
                 let wallCounter = 0;
 
                 // Spawn walls based on layout
@@ -1775,6 +1780,9 @@ export class GameRoom extends Room<GameState> {
 
                     wall.x = wallAnchor.x + wallx;
                     wall.y = wallAnchor.y + wally;
+                    wall.orientation = Number.isInteger(wall.x)
+                    ? "horizontal"
+                    : "vertical";
 
                     this.state.walls.push(wall);
                 }
