@@ -5,12 +5,13 @@ import { ThickEdges } from './OutlineMaterial';
 type WallAnchorEntityProps = {
     position?: [number, number, number];
     selected?: boolean;
+    rotation?: number;
     onClick?: () => void;
 };
 
 const wallAnchorColor = "#550000";
 
-export function WallAnchorEntity({ position = [0, 0, 0], selected = false, onClick, }: WallAnchorEntityProps) {
+export function WallAnchorEntity({ position = [0, 0, 0], selected = false, rotation = 0, onClick, }: WallAnchorEntityProps) {
     const rightGeometry = useMemo(() => {
         const shape = new THREE.Shape();
 
@@ -129,10 +130,12 @@ export function WallAnchorEntity({ position = [0, 0, 0], selected = false, onCli
     }, []);
 
     const color = selected ? "#ff3333" : wallAnchorColor;
+    const rotationRadians = (rotation * Math.PI) / 180;
 
     return(
         <group
             position={position}
+            rotation={[0, rotationRadians, 0]}
             onClick={(e) => {
                 e.stopPropagation();
                 onClick?.();

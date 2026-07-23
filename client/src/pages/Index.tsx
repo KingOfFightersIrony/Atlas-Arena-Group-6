@@ -300,6 +300,7 @@ const Index = () => {
             x: wallAnchor.x,
             y: wallAnchor.y,
             id: wallAnchor.id
+            rotation: wallAnchor.rotation ?? 0,
         });
     });
 

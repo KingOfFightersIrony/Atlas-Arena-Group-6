@@ -85,6 +85,7 @@ interface WallAnchor {
   x: number;
   y: number;
   id: string;
+  rotation: 0 | 90 | 180 | 270;
 }
 
 interface EnemyState {
@@ -2507,21 +2508,22 @@ export const GameScreen = ({
 
             {/* WallAnchors */}
             {wallAnchors.map((wallAnchor) => {
-               const pos = getVisualPos(wallAnchor.x, wallAnchor.y, -2.0);
-               const selected = selectedWallAnchorId === wallAnchor.id;
+              const pos = getVisualPos(wallAnchor.x, wallAnchor.y, -2.0);
+              const selected = selectedWallAnchorId === wallAnchor.id;
 
-               return (
+              return (
                   <WallAnchorEntity
-                   key={wallAnchor.id}
-                   position={pos}
-                   selected={selected}
-                   onClick={() => {
+                     key={wallAnchor.id}
+                     position={pos}
+                     selected={selected}
+                     rotation={wallAnchor.rotation ?? 0}
+                     onClick={() => {
                        console.log("Selected wall anchor:", wallAnchor.id);
                        setSelectedWallAnchorId(wallAnchor.id);
-                     }}
-                   />
-                  );
-             })}
+                      }}
+                     />
+                    );
+                  })}
 
             {/* Enemies */}
             {enemies.map((enemy) => {
