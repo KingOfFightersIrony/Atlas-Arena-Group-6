@@ -1,7 +1,7 @@
 import { BaseCollectible, CollectibleScoreContext, SpawnValidationContext } from "./BaseCollectible";
 
 export class NetworkCollectible extends BaseCollectible {
-  private readonly goldBonus = 5;
+  private readonly goldBonus = 10;
   private readonly baseScore = 1;
 
   protected getSpawnEdgeConstraints(): { minEdge: number; maxEdge: number } {
