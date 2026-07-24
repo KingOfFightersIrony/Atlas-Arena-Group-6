@@ -67,6 +67,7 @@ interface WallAnchor {
     x: number;
     y: number;
     id: string;
+    rotation: number;
 }
 
 type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding";
@@ -107,6 +108,7 @@ interface GameStateLocal {
   gridColors: Map<string, PlayerColor>;
   collectibles: Collectible[];
   walls: Wall[];
+  wallAnchors: WallAnchor[];
   enemies: EnemyState[];
   scores: Record<PlayerColor, number>;
   totalScore: number;
@@ -299,7 +301,7 @@ const Index = () => {
         newWallAnchors.push({
             x: wallAnchor.x,
             y: wallAnchor.y,
-            id: wallAnchor.id
+            id: wallAnchor.id,
             rotation: wallAnchor.rotation ?? 0,
         });
     });
