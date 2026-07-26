@@ -67,7 +67,7 @@ interface WallAnchor {
     x: number;
     y: number;
     id: string;
-    rotation: number;
+    rotation: 0 | 90 | 180 | 270;
 }
 
 type EnemyPersonality = "red-avoiding" | "green-avoiding" | "blue-avoiding" | "same-color-avoiding";
