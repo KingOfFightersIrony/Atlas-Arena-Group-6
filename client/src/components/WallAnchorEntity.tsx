@@ -130,7 +130,7 @@ export function WallAnchorEntity({ position = [0, 0, 0], selected = false, rotat
     }, []);
 
     const color = selected ? "#ff3333" : wallAnchorColor;
-    const rotationRadians = (rotation * Math.PI) / 180;
+    const rotationRadians = -(rotation * Math.PI) / 180;
 
     return(
         <group
